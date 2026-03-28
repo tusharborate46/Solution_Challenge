@@ -3,14 +3,15 @@ import { ShieldAlert, LogOut, CheckCircle, Activity, MapPin } from 'lucide-react
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import IncidentCard from './IncidentCard';
-import ChatBox from './ChatBox';
+import IncidentDetailsStage from './IncidentDetailsStage';
+import MapView from './MapView';
 
 export default function Dashboard() {
   const { user, token, logout } = useAuth();
   const socket = useSocket();
   const [incidents, setIncidents] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [activeChatId, setActiveChatId] = useState(null);
+  const [activeIncidentId, setActiveIncidentId] = useState(null);
 
   useEffect(() => {
     fetchIncidents();
@@ -77,6 +78,7 @@ export default function Dashboard() {
 
   const activeCount = incidents.filter(i => i.status === 'active' || i.status === 'pending').length;
   const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
+  const activeIncident = incidents.find(i => i._id === activeIncidentId);
 
   return (
     <div className="flex h-screen bg-slate-900 text-white overflow-hidden">
@@ -133,7 +135,7 @@ export default function Dashboard() {
         {/* Dynamic Interactive Layout */}
         <div className="flex-1 flex overflow-hidden">
           {/* List View */}
-          <div className={`flex flex-col border-r border-slate-800 bg-slate-900/50 transition-all ${activeChatId ? 'w-1/3' : 'w-1/2'} overflow-y-auto p-6 scrollbar-hide`}>
+          <div className={`flex flex-col border-r border-slate-800 bg-slate-900/50 transition-all ${activeIncidentId ? 'w-1/3' : 'w-1/2'} overflow-y-auto p-6 scrollbar-hide`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-slate-200">Incident Feed</h3>
               <span className="px-3 py-1 bg-slate-800 rounded-full text-xs font-medium text-slate-400">{filteredIncidents.length} Records</span>
@@ -152,8 +154,8 @@ export default function Dashboard() {
                     user={user}
                     onUpdateStatus={handleUpdateStatus}
                     onAssign={handleAssign}
-                    onOpenChat={() => setActiveChatId(incident._id)}
-                    isActive={activeChatId === incident._id}
+                    onOpenChat={() => setActiveIncidentId(incident._id)}
+                    isActive={activeIncidentId === incident._id}
                   />
                 ))
               )}
@@ -161,15 +163,11 @@ export default function Dashboard() {
           </div>
 
           {/* Right Stage: Maps / Chat UI */}
-          <div className="flex-1 bg-slate-950 relative flex flex-col">
-            {activeChatId ? (
-              <ChatBox incidentId={activeChatId} token={token} onClose={() => setActiveChatId(null)} user={user}/>
+          <div className="flex-1 relative flex flex-col">
+            {activeIncidentId && activeIncident ? (
+              <IncidentDetailsStage incident={activeIncident} onClose={() => setActiveIncidentId(null)} user={user} token={token} />
             ) : (
-              <div className="flex-1 flex items-center justify-center flex-col text-slate-500">
-                <MapPin size={64} className="mb-6 text-slate-800" />
-                <h3 className="text-xl font-medium mb-2 text-slate-400">Live Map View Unavailable</h3>
-                <p className="max-w-md text-center">Google Maps integration requires an API key. Map view will display all active incident locations here once configured via the implementation plan.</p>
-              </div>
+              <MapView incidents={filteredIncidents} />
             )}
           </div>
         </div>

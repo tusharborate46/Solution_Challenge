@@ -18,7 +18,12 @@ export default function IncidentCard({ incident, user, onUpdateStatus, onAssign,
              <AlertTriangle size={20} />
           </div>
           <div>
-            <h4 className="font-semibold text-white capitalize">{incident.type} Alert</h4>
+            <div className="flex items-center gap-2">
+              <h4 className="font-semibold text-white capitalize">{incident.type} Alert</h4>
+              {incident.aiAnalysis?.classification && (
+                <span className="text-[10px] bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800/50">AI Assessed</span>
+              )}
+            </div>
             <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
               <Clock size={12} /> {new Date(incident.createdAt).toLocaleTimeString()}
             </p>

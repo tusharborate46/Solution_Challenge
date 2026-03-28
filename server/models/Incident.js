@@ -10,7 +10,7 @@ const incidentSchema = new mongoose.Schema({
   type: { 
     type: String, 
     required: true, 
-    enum: ['fire', 'medical', 'security', 'general'] 
+    enum: ['fire', 'medical', 'security', 'general', 'crime'] 
   },
   severity: {
     type: String,
@@ -29,7 +29,22 @@ const incidentSchema = new mongoose.Schema({
     default: 'pending' 
   },
   chatMessages: [chatMessageSchema],
-  description: String
+  description: String,
+  aiAnalysis: {
+    questions: [{ type: String }],
+    answers: [{ type: String }],
+    classification: String,
+    confidenceScore: Number
+  },
+  dispatchedService: {
+    name: String,
+    serviceType: String,
+    location: { lat: Number, lng: Number },
+    distance: String,
+    duration: String,
+    status: { type: String, enum: ['pending', 'dispatched', 'arrived'], default: 'pending' }
+  },
+  aiOverridden: { type: Boolean, default: false }
 }, { 
   timestamps: true // This auto-generates createdAt and updatedAt
 });
